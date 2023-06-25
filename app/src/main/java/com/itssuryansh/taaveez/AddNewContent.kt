@@ -7,9 +7,11 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.*
+import android.text.Editable
+import android.text.InputFilter
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
 import android.view.KeyEvent
@@ -18,6 +20,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
@@ -26,9 +29,10 @@ import com.itssuryansh.taaveez.databinding.DialogBackAddNewContentBinding
 import jp.wasabeef.richeditor.RichEditor
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
-class Add_New_Content : AppCompatActivity() {
+class AddNewContent : AppCompatActivity() {
 
     private var binding: ActivityAddNewContentBinding? = null
     private val IMAGE_PICKER_REQUEST_CODE = 1001 // or any other unique value
@@ -43,19 +47,17 @@ class Add_New_Content : AppCompatActivity() {
         setContentView(binding?.root)
 
         setupActionBar()
-        val NotesDao = (application as NotesApp).db.NotesDao()
-        AddContent(NotesDao)
+        val notesDao = (application as NotesApp).db.NotesDao()
+        addContent(notesDao)
     }
-
 
     override fun onBackPressed() {
         // Call your desired method here
-       BackData()
+        backData()
     }
+
     @SuppressLint("ResourceType")
-
-     fun AddContent(NotesDao: NotesDao) {
-
+    fun addContent(NotesDao: NotesDao) {
         // bacground color change of richeditor
         val typedValue = TypedValue()
         theme.resolveAttribute(R.attr.editor_bg, typedValue, true)
@@ -65,47 +67,42 @@ class Add_New_Content : AppCompatActivity() {
         theme.resolveAttribute(R.attr.text, typedValue, true)
         val textColor = typedValue.data
 
+        val poemDes: RichEditor? = findViewById(R.id.idnotes)
+        poemDes?.setPlaceholder(getString(R.string.write_here))
+        poemDes?.setEditorBackgroundColor(backgroundColor)
+        poemDes?.setEditorFontColor(textColor)
+        poemDes?.setEditorFontSize(20)
+        poemDes?.setPadding(10, 10, 10, 10)
+        poemDes?.isVerticalScrollBarEnabled = true
+        poemDes?.setTextColor(Color.WHITE)
 
-        val PoemDes : RichEditor? = findViewById(R.id.idnotes)
-        PoemDes?.setPlaceholder(getString(R.string.write_here))
-        PoemDes?.setEditorBackgroundColor(backgroundColor)
-        PoemDes?.setEditorFontColor(textColor)
-        PoemDes?.setEditorFontSize(20)
-        PoemDes?.setPadding(10, 10, 10, 10)
-        PoemDes?.isVerticalScrollBarEnabled = true
-        PoemDes?.setTextColor(Color.WHITE)
-
-        binding?.btnBold?.setOnClickListener { PoemDes?.setBold() }
-        binding?. btnItalic?.setOnClickListener { PoemDes?.setItalic() }
-        binding?. btnUnderline?.setOnClickListener { PoemDes?.setUnderline()}
+        binding?.btnBold?.setOnClickListener { poemDes?.setBold() }
+        binding?. btnItalic?.setOnClickListener { poemDes?.setItalic() }
+        binding?. btnUnderline?.setOnClickListener { poemDes?.setUnderline() }
         binding?.btnUndo?.setOnClickListener {
-            PoemDes?.undo()
+            poemDes?.undo()
         }
-
 
         binding?.btnRedo?.setOnClickListener {
-            PoemDes?.redo()
+            poemDes?.redo()
         }
 
-
-
-        binding?.btnAddLink?.setOnClickListener{
-                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_insert_link, null)
-                val dialog = AlertDialog.Builder(this)
-                    .setTitle("Insert Link")
-                    .setView(dialogView)
-                    .setPositiveButton("OK") { _, _ ->
-                        val urlEditText = dialogView.findViewById<EditText>(R.id.url_edit_text)
-                        val titleEditText = dialogView.findViewById<EditText>(R.id.title_edit_text)
-                        val url = urlEditText.text.toString()
-                        val title = titleEditText.text.toString()
-                        PoemDes?.insertLink(url, title)
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-                    .create()
-                dialog.show()
+        binding?.btnAddLink?.setOnClickListener {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_insert_link, null)
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Insert Link")
+                .setView(dialogView)
+                .setPositiveButton("OK") { _, _ ->
+                    val urlEditText = dialogView.findViewById<EditText>(R.id.url_edit_text)
+                    val titleEditText = dialogView.findViewById<EditText>(R.id.title_edit_text)
+                    val url = urlEditText.text.toString()
+                    val title = titleEditText.text.toString()
+                    poemDes?.insertLink(url, title)
+                }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                .create()
+            dialog.show()
         }
-
 
         val maxLength = 21
         val filterArray = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
@@ -131,10 +128,9 @@ class Add_New_Content : AppCompatActivity() {
             }
         })
 
-
         binding?.saveContent?.setOnClickListener {
             var itemTopic: String = binding?.idTopic?.text.toString()
-            val htmlContentPoemDes= PoemDes?.html.toString()
+            val htmlContentPoemDes = poemDes?.html.toString()
             // setup the date
             val c = Calendar.getInstance()
             val dateTime = c.time
@@ -143,22 +139,32 @@ class Add_New_Content : AppCompatActivity() {
             val date = sdf.format(dateTime)
             Log.e("Formatted Date: ", "" + date)
 
-            if (PoemDes?.html!!.isNotEmpty()) {
+            if (poemDes?.html!!.isNotEmpty()) {
                 if (!(TextUtils.isEmpty(itemTopic.trim { it <= ' ' }))) {
                     lifecycleScope.launch {
                         NotesDao.insert(NotesEntity(Topic = itemTopic, Poem = htmlContentPoemDes, Date = date, CreatedDate = date))
-                        Toast.makeText(applicationContext,
+                        Toast.makeText(
+                            applicationContext,
                             getString(R.string.Record_saved),
-                            Toast.LENGTH_LONG).show()
+                            Toast.LENGTH_LONG,
+                        ).show()
                     }
                 } else {
                     itemTopic = "दुआ"
                     lifecycleScope.launch {
-                        NotesDao.insert(NotesEntity(Topic = itemTopic, Poem = htmlContentPoemDes, Date = date,
-                            CreatedDate = date ))
-                        Toast.makeText(applicationContext,
+                        NotesDao.insert(
+                            NotesEntity(
+                                Topic = itemTopic,
+                                Poem = htmlContentPoemDes,
+                                Date = date,
+                                CreatedDate = date,
+                            ),
+                        )
+                        Toast.makeText(
+                            applicationContext,
                             getString(R.string.Record_saved),
-                            Toast.LENGTH_LONG).show()
+                            Toast.LENGTH_LONG,
+                        ).show()
                     }
                 }
                 super.onBackPressed()
@@ -166,10 +172,8 @@ class Add_New_Content : AppCompatActivity() {
                 val mess = getString(R.string.Field_not_blank)
                 Snackbar.make(binding?.idTopic!!, mess, Snackbar.LENGTH_LONG).show()
             }
-
         }
     }
-
 
 //    Handle the backspace button to undo the last action:
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -180,8 +184,6 @@ class Add_New_Content : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
-
-
     private fun setupActionBar() {
         setSupportActionBar(binding?.toolbarAddNewContent)
         val actionBar = supportActionBar
@@ -190,68 +192,61 @@ class Add_New_Content : AppCompatActivity() {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_color_back_24dp)
             actionBar.setTitle(0)
         }
-        binding?.toolbarAddNewContent?.setNavigationOnClickListener { BackData() }
+        binding?.toolbarAddNewContent?.setNavigationOnClickListener { backData() }
     }
-
 
     private fun setLocate(Lang: String) {
         val locale = Locale(Lang)
         Locale.setDefault(locale)
         val config = Configuration()
         config.locale = locale
-        baseContext.resources.updateConfiguration(config,baseContext.resources.displayMetrics)
+        baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
         val editor = getSharedPreferences("Setting", Context.MODE_PRIVATE).edit()
-        editor.putString("My_Lang",Lang)
+        editor.putString("My_Lang", Lang)
         editor.apply()
     }
 
-    private fun loadLocate(){
-        val sharedPreferences=getSharedPreferences("Setting", Activity.MODE_PRIVATE)
-        val language= sharedPreferences.getString("My_Lang","MyLang")
+    private fun loadLocate() {
+        val sharedPreferences = getSharedPreferences("Setting", Activity.MODE_PRIVATE)
+        val language = sharedPreferences.getString("My_Lang", "MyLang")
         if (language != null) {
             setLocate(language)
         }
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private fun loadDayNight(){
-        val sharedPreferences=getSharedPreferences("DayNight", Activity.MODE_PRIVATE)
-        val DayNight= sharedPreferences.getString("My_DayNight","MyDayNight")
-        if (DayNight != null) {
-            setDayNight(DayNight)
+    private fun loadDayNight() {
+        val sharedPreferences = getSharedPreferences("DayNight", Activity.MODE_PRIVATE)
+        val dayNight = sharedPreferences.getString("My_DayNight", "MyDayNight")
+        if (dayNight != null) {
+            setDayNight(dayNight)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun setDayNight(daynightMode: String) {
         val editor = getSharedPreferences("DayNight", Context.MODE_PRIVATE).edit()
-        editor.putString("My_DayNight",daynightMode)
+        editor.putString("My_DayNight", daynightMode)
         editor.apply()
-        if(daynightMode=="yes"){
+        if (daynightMode == "yes") {
             getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }
-        else{
+        } else {
             getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 
-
-    private fun BackData() {
-        val BackDialog = Dialog(this)
-        BackDialog.setCancelable(false)
+    private fun backData() {
+        val backDialog = Dialog(this)
+        backDialog.setCancelable(false)
         val binding = DialogBackAddNewContentBinding.inflate(layoutInflater)
-        BackDialog.setContentView(binding.root)
+        backDialog.setContentView(binding.root)
         binding?.btnBackNo?.setOnClickListener {
-            BackDialog.dismiss()
+            backDialog.dismiss()
         }
         binding?.btnBackYes?.setOnClickListener {
-            BackDialog.dismiss()
+            backDialog.dismiss()
             super.onBackPressed()
         }
-        BackDialog.show()
+        backDialog.show()
     }
-
-
 }

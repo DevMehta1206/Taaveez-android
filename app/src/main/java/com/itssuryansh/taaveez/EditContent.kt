@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -21,6 +20,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
@@ -29,30 +29,28 @@ import com.itssuryansh.taaveez.databinding.DialogBackAddNewContentBinding
 import jp.wasabeef.richeditor.RichEditor
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
-class Edit_Content : AppCompatActivity() {
-    private var binding:ActivityEditContentBinding?=null
+class EditContent : AppCompatActivity() {
+    private var binding: ActivityEditContentBinding? = null
     private lateinit var NotesDao: NotesDao
 
+    var createdDate: String = ""
 
-    var CreatedDate:String=""
+    private var id: Int? = null
 
-
-    private var id :Int? = null
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
         loadLocate()
         loadDayNight()
-        id = intent.getIntExtra(Constants.ID,0)
+        id = intent.getIntExtra(Constants.ID, 0)
         super.onCreate(savedInstanceState)
         binding = ActivityEditContentBinding.inflate(layoutInflater)
         setContentView(binding?.root)
         setupActionBar()
 
         NotesDao = (application as NotesApp).db.NotesDao()
-
-
 
         // color acc to the theme - text and background color
         val typedValue = TypedValue()
@@ -62,29 +60,28 @@ class Edit_Content : AppCompatActivity() {
         val textColor = typedValue.data
         binding?.etUpdatePoem?.setTextColor(textColor)
 
-        val PoemDes: RichEditor = findViewById(R.id.etUpdatePoem)
-        PoemDes.setEditorFontSize(20)
-        PoemDes?.setPlaceholder(getString(R.string.write_here))
-        PoemDes?.setEditorBackgroundColor(backgroundColor)
-        PoemDes?.setEditorFontColor(textColor)
-        PoemDes.setPadding(10, 10, 10, 10)
-        PoemDes.setVerticalScrollBarEnabled(true);
+        val poemDes: RichEditor = findViewById(R.id.etUpdatePoem)
+        poemDes.setEditorFontSize(20)
+        poemDes?.setPlaceholder(getString(R.string.write_here))
+        poemDes?.setEditorBackgroundColor(backgroundColor)
+        poemDes?.setEditorFontColor(textColor)
+        poemDes.setPadding(10, 10, 10, 10)
+        poemDes.setVerticalScrollBarEnabled(true)
 
-
-        val btnBold : ImageButton? = findViewById(R.id.btn_update_bold)
-        btnBold?.setOnClickListener { PoemDes?.setBold() }
-        val btnItalic : ImageButton? = findViewById(R.id.btn_update_italic)
-        btnItalic?.setOnClickListener { PoemDes?.setItalic() }
+        val btnBold: ImageButton? = findViewById(R.id.btn_update_bold)
+        btnBold?.setOnClickListener { poemDes?.setBold() }
+        val btnItalic: ImageButton? = findViewById(R.id.btn_update_italic)
+        btnItalic?.setOnClickListener { poemDes?.setItalic() }
 
         binding?.btnUdpateUndo?.setOnClickListener {
-            PoemDes?.undo()
+            poemDes?.undo()
         }
 
         binding?.btnUpdateRedo?.setOnClickListener {
-            PoemDes?.redo()
+            poemDes?.redo()
         }
-        val btn_addLink =findViewById<ImageButton>(R.id.btn_update_addLink)
-        btn_addLink.setOnClickListener{
+        val btnAddlink = findViewById<ImageButton>(R.id.btn_update_addLink)
+        btnAddlink.setOnClickListener {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_insert_link, null)
             val dialog = AlertDialog.Builder(this)
                 .setTitle("Insert Link")
@@ -94,27 +91,24 @@ class Edit_Content : AppCompatActivity() {
                     val titleEditText = dialogView.findViewById<EditText>(R.id.title_edit_text)
                     val url = urlEditText.text.toString()
                     val title = titleEditText.text.toString()
-                    PoemDes.insertLink(url, title)
+                    poemDes.insertLink(url, title)
                 }
                 .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
                 .create()
             dialog.show()
         }
-        val btnUnderline : ImageButton? = findViewById(R.id.btn_update_underline)
-        btnUnderline?.setOnClickListener { PoemDes?.setUnderline() }
+        val btnUnderline: ImageButton? = findViewById(R.id.btn_update_underline)
+        btnUnderline?.setOnClickListener { poemDes?.setUnderline() }
 
         // setUP the content in the editview and richeditor from the Database
         lifecycleScope.launch {
-
             NotesDao.fetchNotesById(id!!).collect {
                 if (it != null) {
                     binding?.etPoemTopic?.setText(it.Topic)
                     binding?.etUpdatePoem?.setHtml(it.Poem)
-                    CreatedDate = it.CreatedDate
-
+                    createdDate = it.CreatedDate
                 }
             }
-
         }
 
         // edit text  - topic lenght size limit
@@ -143,13 +137,9 @@ class Edit_Content : AppCompatActivity() {
             }
         })
 
-
         binding?.btnUpdatePoem?.setOnClickListener {
             updateData()
         }
-
-
-
     }
 
     //    Handle the backspace button to undo the last action:
@@ -161,12 +151,9 @@ class Edit_Content : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
-
     private fun updateData() {
-        var Topic = binding?.etPoemTopic?.text.toString()
-        var Poem = binding?.etUpdatePoem?.html
-
-
+        var topic = binding?.etPoemTopic?.text.toString()
+        var poem = binding?.etUpdatePoem?.html
 
         val c = Calendar.getInstance()
         val dateTime = c.time
@@ -175,80 +162,67 @@ class Edit_Content : AppCompatActivity() {
         val date = sdf.format(dateTime)
         Log.e("Formatted Date: ", "" + date)
 
-
-        if (!(Poem!!.isEmpty())) {
-            if (!(TextUtils.isEmpty(Topic.trim { it <= ' ' }))) {
+        if (!(poem!!.isEmpty())) {
+            if (!(TextUtils.isEmpty(topic.trim { it <= ' ' }))) {
                 lifecycleScope.launch {
-                    NotesDao.update(NotesEntity(id!!, Topic, Poem, date,CreatedDate))
+                    NotesDao.update(NotesEntity(id!!, topic, poem, date, createdDate))
                     Toast.makeText(applicationContext, "Record Updated", Toast.LENGTH_LONG)
                         .show()
-                    intent.flags =  Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
             } else {
-                Topic = "दुआ"
+                topic = "दुआ"
                 lifecycleScope.launch {
-                    NotesDao.update(NotesEntity(id!!, Topic, Poem, date, CreatedDate))
+                    NotesDao.update(NotesEntity(id!!, topic, poem, date, createdDate))
                     Toast.makeText(applicationContext, "Record Updated", Toast.LENGTH_LONG)
                         .show()
-                    intent.flags =  Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
             }
             super.onBackPressed()
-        } else{
+        } else {
             val mess = getString(R.string.Field_not_blank)
             Snackbar.make(binding?.etUpdatePoem!!, mess, Snackbar.LENGTH_LONG).show()
         }
     }
-
 
     private fun setLocate(Lang: String) {
         val locale = Locale(Lang)
         Locale.setDefault(locale)
         val config = Configuration()
         config.locale = locale
-        baseContext.resources.updateConfiguration(config,baseContext.resources.displayMetrics)
+        baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
         val editor = getSharedPreferences("Setting", Context.MODE_PRIVATE).edit()
-        editor.putString("My_Lang",Lang)
+        editor.putString("My_Lang", Lang)
         editor.apply()
     }
 
-
-
-    private fun loadLocate(){
-        val sharedPreferences=getSharedPreferences("Setting", Activity.MODE_PRIVATE)
-        val language= sharedPreferences.getString("My_Lang","MyLang")
+    private fun loadLocate() {
+        val sharedPreferences = getSharedPreferences("Setting", Activity.MODE_PRIVATE)
+        val language = sharedPreferences.getString("My_Lang", "MyLang")
         if (language != null) {
             setLocate(language)
         }
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private fun loadDayNight(){
-        val sharedPreferences=getSharedPreferences("DayNight", Activity.MODE_PRIVATE)
-        val DayNight= sharedPreferences.getString("My_DayNight","MyDayNight")
-        if (DayNight != null) {
-            setDayNight(DayNight)
+    private fun loadDayNight() {
+        val sharedPreferences = getSharedPreferences("DayNight", Activity.MODE_PRIVATE)
+        val dayNight = sharedPreferences.getString("My_DayNight", "MyDayNight")
+        if (dayNight != null) {
+            setDayNight(dayNight)
         }
     }
-
-
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun setDayNight(daynightMode: String) {
         val editor = getSharedPreferences("DayNight", Context.MODE_PRIVATE).edit()
-        editor.putString("My_DayNight",daynightMode)
+        editor.putString("My_DayNight", daynightMode)
         editor.apply()
-        if(daynightMode=="yes"){
-            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-        }
-        else{
-            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
+        if (daynightMode == "yes") {
+            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 
@@ -260,27 +234,26 @@ class Edit_Content : AppCompatActivity() {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_color_back_24dp)
             actionBar.setTitle(0)
         }
-        binding?.toolbarUpdateContent?.setNavigationOnClickListener { BackData() }
+        binding?.toolbarUpdateContent?.setNavigationOnClickListener { backData() }
     }
 
-    private fun BackData() {
-        val BackDialog = Dialog(this)
-        BackDialog.setCancelable(false)
+    private fun backData() {
+        val backDialog = Dialog(this)
+        backDialog.setCancelable(false)
         val binding = DialogBackAddNewContentBinding.inflate(layoutInflater)
-        BackDialog.setContentView(binding.root)
+        backDialog.setContentView(binding.root)
         binding?.btnBackNo?.setOnClickListener {
-            BackDialog.dismiss()
+            backDialog.dismiss()
         }
         binding?.btnBackYes?.setOnClickListener {
-            BackDialog.dismiss()
+            backDialog.dismiss()
             super.onBackPressed()
         }
-        BackDialog.show()
+        backDialog.show()
     }
 
     override fun onBackPressed() {
         // Call your desired method here
-        BackData()
+        backData()
     }
-
 }
