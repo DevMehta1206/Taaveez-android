@@ -35,7 +35,7 @@ import java.util.Locale
 class AddNewContent : AppCompatActivity() {
 
     private var binding: ActivityAddNewContentBinding? = null
-    private val IMAGE_PICKER_REQUEST_CODE = 1001 // or any other unique value
+//    private val IMAGE_PICKER_REQUEST_CODE = 1001 // or any other unique value // currently not in use
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +57,7 @@ class AddNewContent : AppCompatActivity() {
     }
 
     @SuppressLint("ResourceType")
-    fun addContent(NotesDao: NotesDao) {
+    fun addContent(notesDao: NotesDao) {
         // bacground color change of richeditor
         val typedValue = TypedValue()
         theme.resolveAttribute(R.attr.editor_bg, typedValue, true)
@@ -142,7 +142,7 @@ class AddNewContent : AppCompatActivity() {
             if (poemDes?.html!!.isNotEmpty()) {
                 if (!(TextUtils.isEmpty(itemTopic.trim { it <= ' ' }))) {
                     lifecycleScope.launch {
-                        NotesDao.insert(NotesEntity(Topic = itemTopic, Poem = htmlContentPoemDes, Date = date, CreatedDate = date))
+                        notesDao.insert(NotesEntity(topic = itemTopic, poem = htmlContentPoemDes, date = date, createdDate = date))
                         Toast.makeText(
                             applicationContext,
                             getString(R.string.Record_saved),
@@ -152,12 +152,12 @@ class AddNewContent : AppCompatActivity() {
                 } else {
                     itemTopic = "दुआ"
                     lifecycleScope.launch {
-                        NotesDao.insert(
+                        notesDao.insert(
                             NotesEntity(
-                                Topic = itemTopic,
-                                Poem = htmlContentPoemDes,
-                                Date = date,
-                                CreatedDate = date,
+                                topic = itemTopic,
+                                poem = htmlContentPoemDes,
+                                date = date,
+                                createdDate = date,
                             ),
                         )
                         Toast.makeText(

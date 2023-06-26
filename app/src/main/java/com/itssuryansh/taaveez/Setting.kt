@@ -29,7 +29,7 @@ open class Setting : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
-        loadswithtoRightMode()
+        loadSwithToRightMode()
 //        binding?.switchTheme?.setChecked(true)
         loadLocate()
         loadDayNight()
@@ -72,7 +72,7 @@ open class Setting : AppCompatActivity() {
         }
 
         binding?.llfeedback?.setOnClickListener {
-            feedback()
+            feedBack()
         }
 
         binding?.llPrivacyPolicy?.setOnClickListener {
@@ -85,7 +85,7 @@ open class Setting : AppCompatActivity() {
         daynight()
     }
 
-    private fun loadswithtoRightMode() {
+    private fun loadSwithToRightMode() {
         if (Constants.Theme == "1") {
             binding?.switchTheme?.setChecked(true)
         } else {
@@ -93,7 +93,7 @@ open class Setting : AppCompatActivity() {
         }
     }
 
-    private fun feedback() {
+    private fun feedBack() {
         Toast.makeText(this@Setting, getString(R.string.scroll_down_for_rating), Toast.LENGTH_LONG).show()
 
         val playStoreIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName()))

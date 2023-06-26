@@ -33,8 +33,8 @@ class ItemAdapter(
         val context = holder.itemView.context
         val item = items[position]
 
-        holder.tvTopic.text = item.Topic
-        holder.tvDate.text = item.Date
+        holder.tvTopic.text = item.topic
+        holder.tvDate.text = item.date
 
         holder.ivEdit.setOnClickListener {
             updateListener.invoke(item.id)

@@ -12,12 +12,12 @@ import com.itssuryansh.taaveez.databinding.ActivityWebViewBinding
 class WebView : AppCompatActivity() {
     private lateinit var webView: WebView
     private var binding: ActivityWebViewBinding? = null
-    private var Link: String? = null
+    private var link: String? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Link = intent.getStringExtra(Constants.LINK)
+        link = intent.getStringExtra(Constants.LINK)
         super.onCreate(savedInstanceState)
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding?.root)
@@ -26,7 +26,7 @@ class WebView : AppCompatActivity() {
         binding?.webView?.apply {
             settings.javaScriptEnabled = true
             settings.safeBrowsingEnabled = true
-            Link?.let { loadUrl(it) }
+            link?.let { loadUrl(it) }
         }
     }
 

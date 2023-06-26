@@ -104,9 +104,9 @@ class EditContent : AppCompatActivity() {
         lifecycleScope.launch {
             NotesDao.fetchNotesById(id!!).collect {
                 if (it != null) {
-                    binding?.etPoemTopic?.setText(it.Topic)
-                    binding?.etUpdatePoem?.setHtml(it.Poem)
-                    createdDate = it.CreatedDate
+                    binding?.etPoemTopic?.setText(it.topic)
+                    binding?.etUpdatePoem?.setHtml(it.poem)
+                    createdDate = it.createdDate
                 }
             }
         }

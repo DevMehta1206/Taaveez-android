@@ -41,7 +41,7 @@ import java.util.Locale
 class Notes : AppCompatActivity() {
 
     private var binding: ActivityNotesBinding? = null
-    private var PoemDesUpdate: RichEditor ? = null
+    private var poemDesUpdate: RichEditor ? = null
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +75,7 @@ class Notes : AppCompatActivity() {
         lifecycleScope.launch {
             notesDao.fetchAllNotes().collect {
                 val list = ArrayList(it)
-                setupListOfDateINtoRecycleVIew(list, notesDao)
+                setupListOfDateIntoRecycleView(list, notesDao)
             }
         }
     }
@@ -142,7 +142,7 @@ class Notes : AppCompatActivity() {
             if (!(poemDes.html.isNullOrEmpty())) {
                 if (!(TextUtils.isEmpty(itemTopic.trim { it <= ' ' }))) {
                     lifecycleScope.launch {
-                        NotesDao.insert(NotesEntity(Topic = itemTopic, Poem = htmlContentPoemDes, Date = date, CreatedDate = date))
+                        NotesDao.insert(NotesEntity(topic = itemTopic, poem = htmlContentPoemDes, date = date, createdDate = date))
                         Toast.makeText(
                             applicationContext,
                             getString(R.string.Record_saved),
@@ -154,10 +154,10 @@ class Notes : AppCompatActivity() {
                     lifecycleScope.launch {
                         NotesDao.insert(
                             NotesEntity(
-                                Topic = itemTopic,
-                                Poem = htmlContentPoemDes,
-                                Date = date,
-                                CreatedDate = date,
+                                topic = itemTopic,
+                                poem = htmlContentPoemDes,
+                                date = date,
+                                createdDate = date,
                             ),
                         )
                         Toast.makeText(
@@ -176,24 +176,24 @@ class Notes : AppCompatActivity() {
         poemDialog.show()
     }
 
-    private fun setupListOfDateINtoRecycleVIew(
-        NotesList: ArrayList<NotesEntity>,
-        NotesDao: NotesDao,
+    private fun setupListOfDateIntoRecycleView(
+        notesList: ArrayList<NotesEntity>,
+        notesDao: NotesDao,
     ) {
-        if (NotesList.isNotEmpty()) {
+        if (notesList.isNotEmpty()) {
             val itemAdapter = ItemAdapter(
-                NotesList,
+                notesList,
                 { updateId ->
-                    updateRecordDialog(updateId, NotesDao)
+                    updateRecordDialog(updateId, notesDao)
                 },
                 { deleteId ->
-                    deleteRecordAlertDialog(deleteId, NotesDao)
+                    deleteRecordAlertDialog(deleteId, notesDao)
                 },
                 { OpenId ->
-                    openNotes(OpenId, NotesDao)
+                    openNotes(OpenId, notesDao)
                 },
                 { ShareId ->
-                    shareNotes(ShareId, NotesDao)
+                    shareNotes(ShareId, notesDao)
                 },
             )
 
@@ -216,8 +216,8 @@ class Notes : AppCompatActivity() {
         lifecycleScope.launch {
             NotesDao.fetchNotesById(id).collect {
                 if (it != null) {
-                    topic = it.Topic
-                    poemDes = it.Poem
+                    topic = it.topic
+                    poemDes = it.poem
                     val sendIntent = Intent()
                     sendIntent.type = "text/plain"
                     sendIntent.action = Intent.ACTION_SEND
@@ -242,10 +242,10 @@ class Notes : AppCompatActivity() {
         lifecycleScope.launch {
             NotesDao.fetchNotesById(id).collect {
                 if (it != null) {
-                    topic = it.Topic
-                    poemDes = it.Poem
-                    createdDate = it.CreatedDate
-                    updatedDate = it.Date
+                    topic = it.topic
+                    poemDes = it.poem
+                    createdDate = it.createdDate
+                    updatedDate = it.date
 
                     val intent = Intent(this@Notes, OpenPoem::class.java)
                     intent.putExtra(Constants.POEM_TOPIC, topic)
@@ -262,9 +262,9 @@ class Notes : AppCompatActivity() {
 
     //    Handle the backspace button to undo the last action: in update dialog
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        PoemDesUpdate = findViewById(R.id.etUpdatePoem)
-        if (keyCode == KeyEvent.KEYCODE_DEL && PoemDesUpdate != null) {
-            PoemDesUpdate?.undo()
+        poemDesUpdate = findViewById(R.id.etUpdatePoem)
+        if (keyCode == KeyEvent.KEYCODE_DEL && poemDesUpdate != null) {
+            poemDesUpdate?.undo()
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -327,9 +327,9 @@ class Notes : AppCompatActivity() {
         lifecycleScope.launch {
             NotesDao.fetchNotesById(id).collect {
                 if (it != null) {
-                    binding.etPoemTopic.setText(it.Topic)
-                    binding.etUpdatePoem.setHtml(it.Poem)
-                    createdDate = it.CreatedDate
+                    binding.etPoemTopic.setText(it.topic)
+                    binding.etUpdatePoem.setHtml(it.poem)
+                    createdDate = it.createdDate
                 }
             }
         }

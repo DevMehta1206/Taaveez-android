@@ -21,20 +21,20 @@ import com.itssuryansh.taaveez.databinding.ActivityOpenPoemBinding
 class OpenPoem : AppCompatActivity() {
 
     private var binding: ActivityOpenPoemBinding? = null
-    private var PoemTopic: String? = null
-    private var PoemDes: String? = null
-    private var CreatedDate: String? = null
-    private var UpdatedDate: String? = null
+    private var poemTopic: String? = null
+    private var poemDes: String? = null
+    private var createdDate: String? = null
+    private var updatedDate: String? = null
     private var textToCopy: String? = null
     private var id: Int? = null
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         loadDayNight()
-        PoemTopic = intent.getStringExtra(Constants.POEM_TOPIC)
-        PoemDes = intent.getStringExtra(Constants.POEM_DES)
-        CreatedDate = intent.getStringExtra(Constants.CREATED_DATE)
-        UpdatedDate = intent.getStringExtra(Constants.UPDATED_DATE)
+        poemTopic = intent.getStringExtra(Constants.POEM_TOPIC)
+        poemDes = intent.getStringExtra(Constants.POEM_DES)
+        createdDate = intent.getStringExtra(Constants.CREATED_DATE)
+        updatedDate = intent.getStringExtra(Constants.UPDATED_DATE)
         id = intent.getIntExtra(Constants.ID, 0)
 
         super.onCreate(savedInstanceState)
@@ -46,13 +46,13 @@ class OpenPoem : AppCompatActivity() {
             popup()
         }
 
-        binding?.tvTopic?.text = PoemTopic
-        binding?.tvPoemDes?.text = Html.fromHtml(PoemDes)
+        binding?.tvTopic?.text = poemTopic
+        binding?.tvPoemDes?.text = Html.fromHtml(poemDes)
 
         binding?.tvPoemDes?.movementMethod = LinkMovementMethod.getInstance() // enable link clicking
         binding?.tvPoemDes?.setTextIsSelectable(true) // enable text selection
 
-        textToCopy = Html.fromHtml(PoemDes).toString()
+        textToCopy = Html.fromHtml(poemDes).toString()
     }
 
     private fun popup() {
@@ -111,9 +111,9 @@ class OpenPoem : AppCompatActivity() {
         val sendIntent = Intent()
         sendIntent.type = "text/plain"
         sendIntent.action = Intent.ACTION_SEND
-        val body = "Topic = ${PoemTopic}\n" +
+        val body = "Topic = ${poemTopic}\n" +
             "--------------------------------\n" +
-            "${Html.fromHtml(PoemDes)}"
+            "${Html.fromHtml(poemDes)}"
         sendIntent.putExtra(Intent.EXTRA_TEXT, body)
         Intent.createChooser(sendIntent, "Share using")
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -126,8 +126,8 @@ class OpenPoem : AppCompatActivity() {
         val binding = AboutOfOpenContentBinding.inflate(layoutInflater)
         aboutDialog.setContentView(binding.root)
 
-        binding?.tvPoemCreatedDate?.text = CreatedDate
-        binding?.tvPoemUpdatedDate?.text = UpdatedDate
+        binding?.tvPoemCreatedDate?.text = createdDate
+        binding?.tvPoemUpdatedDate?.text = updatedDate
 
         binding?.btnAboutOpenContentBack?.setOnClickListener {
             aboutDialog.dismiss()
