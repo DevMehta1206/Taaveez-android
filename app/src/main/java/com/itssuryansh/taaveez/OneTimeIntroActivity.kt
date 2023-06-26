@@ -18,7 +18,7 @@ class OneTimeIntroActivity : AppIntro() {
 
         // Check if the app is running for the first time
         val sharedPreferences = getSharedPreferences(Constants.MyPrefs, Context.MODE_PRIVATE)
-        val introShown = sharedPreferences.getBoolean(Constants.introShown, false) // it is false initially
+        val introShown = sharedPreferences.getBoolean(Constants.INTRO_SHOWN, false) // it is false initially
         if (introShown) {
             // The intro screen has already been shown, so just finish this activity
             startActivity(Intent(this@OneTimeIntroActivity, SplashActivity::class.java))
@@ -66,7 +66,7 @@ class OneTimeIntroActivity : AppIntro() {
             ),
         )
         val editor = sharedPreferences.edit()
-        editor.putBoolean(Constants.introShown, true)
+        editor.putBoolean(Constants.INTRO_SHOWN, true)
         editor.apply()
     }
 

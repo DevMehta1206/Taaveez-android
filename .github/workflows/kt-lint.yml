@@ -34,3 +34,5 @@ jobs:
           patterns: |
             **/**.kt
             !**/generated/**
+          # Enable verbose output
+          verbose: true

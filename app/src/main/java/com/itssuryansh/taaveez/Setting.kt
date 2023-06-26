@@ -86,7 +86,7 @@ open class Setting : AppCompatActivity() {
     }
 
     private fun loadSwithToRightMode() {
-        if (Constants.Theme == "1") {
+        if (Constants.theme == "1") {
             binding?.switchTheme?.setChecked(true)
         } else {
             binding?.switchTheme?.setChecked(false)
@@ -192,10 +192,10 @@ open class Setting : AppCompatActivity() {
         switch.setOnCheckedChangeListener { compoundButton, b ->
             if (switch.isChecked) {
                 setDayNight("yes")
-                Constants.Theme = "1"
+                Constants.theme = "1"
             } else {
                 setDayNight("no")
-                Constants.Theme = "0"
+                Constants.theme = "0"
             }
         }
     }

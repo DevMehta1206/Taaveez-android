@@ -7,8 +7,8 @@ object Constants {
     const val CREATED_DATE: String = "created_date"
     const val UPDATED_DATE: String = "updated_date"
     const val MyPrefs: String = "MyPrefss"
-    const val introShown: String = "introShown"
+    const val INTRO_SHOWN: String = "introShown"
     const val LINK: String = "link"
     const val ID = "id"
-    var Theme: String = "0"
+    var theme: String = "0"
 }
