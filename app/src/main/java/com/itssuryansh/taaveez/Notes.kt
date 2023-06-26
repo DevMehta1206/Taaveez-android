@@ -81,7 +81,7 @@ class Notes : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun newPoemDialog(NotesDao: NotesDao) {
+    private fun newPoemDialog(notesDao: NotesDao) {
         val poemDialog = Dialog(this)
         poemDialog.setCancelable(false)
         poemDialog.setContentView(R.layout.notes_add_dialog)
@@ -104,9 +104,9 @@ class Notes : AppCompatActivity() {
         val cancelBtn = poemDialog.findViewById<Button>(R.id.idBtnCancel)
         val addBtn = poemDialog.findViewById<Button>(R.id.idBtnAdd)
         val itemTopic = poemDialog.findViewById<EditText>(R.id.idTopic)
-        val btnAddlink = poemDialog.findViewById<ImageButton>(R.id.btn_add_link)
+        val btnAddLink = poemDialog.findViewById<ImageButton>(R.id.btn_add_link)
 
-        btnAddlink.setOnClickListener {
+        btnAddLink.setOnClickListener {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_insert_link, null)
             val dialog = AlertDialog.Builder(this)
                 .setTitle("Insert Link")
@@ -142,7 +142,7 @@ class Notes : AppCompatActivity() {
             if (!(poemDes.html.isNullOrEmpty())) {
                 if (!(TextUtils.isEmpty(itemTopic.trim { it <= ' ' }))) {
                     lifecycleScope.launch {
-                        NotesDao.insert(NotesEntity(topic = itemTopic, poem = htmlContentPoemDes, date = date, createdDate = date))
+                        notesDao.insert(NotesEntity(topic = itemTopic, poem = htmlContentPoemDes, date = date, createdDate = date))
                         Toast.makeText(
                             applicationContext,
                             getString(R.string.Record_saved),
@@ -152,7 +152,7 @@ class Notes : AppCompatActivity() {
                 } else {
                     itemTopic = "दुआ"
                     lifecycleScope.launch {
-                        NotesDao.insert(
+                        notesDao.insert(
                             NotesEntity(
                                 topic = itemTopic,
                                 poem = htmlContentPoemDes,
@@ -189,11 +189,11 @@ class Notes : AppCompatActivity() {
                 { deleteId ->
                     deleteRecordAlertDialog(deleteId, notesDao)
                 },
-                { OpenId ->
-                    openNotes(OpenId, notesDao)
+                { openId ->
+                    openNotes(openId, notesDao)
                 },
-                { ShareId ->
-                    shareNotes(ShareId, notesDao)
+                { shareId ->
+                    shareNotes(shareId, notesDao)
                 },
             )
 
@@ -209,12 +209,12 @@ class Notes : AppCompatActivity() {
         }
     }
 
-    private fun shareNotes(id: Int, NotesDao: NotesDao) {
+    private fun shareNotes(id: Int, notesDao: NotesDao) {
         var topic: String?
         var poemDes: String?
 
         lifecycleScope.launch {
-            NotesDao.fetchNotesById(id).collect {
+            notesDao.fetchNotesById(id).collect {
                 if (it != null) {
                     topic = it.topic
                     poemDes = it.poem

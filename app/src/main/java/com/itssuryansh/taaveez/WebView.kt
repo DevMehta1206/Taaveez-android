@@ -15,7 +15,6 @@ class WebView : AppCompatActivity() {
     private var link: String? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         link = intent.getStringExtra(Constants.LINK)
         super.onCreate(savedInstanceState)

@@ -10,8 +10,8 @@ class ItemAdapter(
     private val items: ArrayList<NotesEntity>,
     private val updateListener: (id: Int) -> Unit,
     private val deleteListener: (id: Int) -> Unit,
-    private val OpenListener: (id: Int) -> Unit,
-    private val ShareListener: (id: Int) -> Unit,
+    private val openListener: (id: Int) -> Unit,
+    private val shareListener: (id: Int) -> Unit,
 ) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
@@ -43,10 +43,10 @@ class ItemAdapter(
             deleteListener.invoke(item.id)
         }
         holder.llTopic.setOnClickListener {
-            OpenListener.invoke(item.id)
+            openListener.invoke(item.id)
         }
         holder.ivShare.setOnClickListener {
-            ShareListener.invoke(item.id)
+            shareListener.invoke(item.id)
         }
     }
 

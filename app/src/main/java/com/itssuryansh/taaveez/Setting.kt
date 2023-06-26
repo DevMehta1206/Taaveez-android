@@ -125,14 +125,14 @@ open class Setting : AppCompatActivity() {
         mDialog.show()
     }
 
-    private fun setLocate(Lang: String) {
-        val locale = Locale(Lang)
+    private fun setLocate(lang: String) {
+        val locale = Locale(lang)
         Locale.setDefault(locale)
         val config = Configuration()
         config.locale = locale
         baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
         val editor = getSharedPreferences("Setting", MODE_PRIVATE).edit()
-        editor.putString("My_Lang", Lang)
+        editor.putString("My_Lang", lang)
         editor.apply()
     }
 
